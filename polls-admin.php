@@ -7,8 +7,9 @@ class Polls_Admin {
 		add_action( 'init', array( &$this, 'poll_tinymce_addbuttons' ) );
 
 		add_action( 'admin_menu', array( &$this, 'poll_menu' ) );
-		add_action( 'admin_enqueue_scripts', array( &$this, 'poll_scripts_admin' ) );
+		add_action( 'admin_bar_menu',  array( &$this, 'add_toolbar_node' ), 999 );
 
+		add_action( 'admin_enqueue_scripts', array( &$this, 'poll_scripts_admin' ) );
 		add_action( 'admin_footer', array( &$this, 'poll_footer_admin' ) );
 	}
 
@@ -20,6 +21,19 @@ class Polls_Admin {
 		add_submenu_page( 'wp-polls/polls-manager.php', __( 'Poll Options', 'wp-polls' ), __( 'Poll Options', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-options.php' );
 		add_submenu_page( 'wp-polls/polls-manager.php', __( 'Poll Templates', 'wp-polls' ), __( 'Poll Templates', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-templates.php' );
 		add_submenu_page( 'wp-polls/polls-manager.php', __( 'Uninstall WP-Polls', 'wp-polls' ), __( 'Uninstall WP-Polls', 'wp-polls' ), 'manage_polls', 'wp-polls/polls-uninstall.php' );
+	}
+
+	function add_toolbar_node( $wp_admin_bar ) {
+		if( current_user_can( 'manage_polls' ) ) {
+			$args = array(
+				'parent' => 'new-content',
+				'id'     => 'add-poll',
+				'title'  => __( 'Add Poll', 'wp-polls' ),
+				'href'   => admin_url( 'admin.php?page=wp-polls/polls-add.php' )
+			);
+
+			$wp_admin_bar->add_node($args);
+		}
 	}
 
 	### Function: Enqueue Polls Stylesheets/JavaScripts In WP-Admin

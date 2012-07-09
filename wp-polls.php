@@ -240,19 +240,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
 }
 
 
-
-
-### Function: Add Favourite Actions >= WordPress 2.7
-add_filter('favorite_actions', 'poll_favorite_actions');
-function poll_favorite_actions($favorite_actions) {
-       $favorite_actions['admin.php?page=wp-polls/polls-add.php'] = array(__('Add Poll', 'wp-polls'), 'manage_polls');
-       return $favorite_actions;
-}
-
-
-
-
-
 ### Function: Check Who Is Allow To Vote
 function check_allowtovote() {
 	global $user_ID;
