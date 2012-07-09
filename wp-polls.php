@@ -27,6 +27,8 @@ Author URI: http://lesterchan.net
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+define( 'WP_POLLS_VERSION', '3.0' );
+
 include 'polls-admin.php';
 include 'widget.polls.php';
 include 'support.wp-stats.php';

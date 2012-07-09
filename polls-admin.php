@@ -27,8 +27,8 @@ class Polls_Admin {
 		$poll_admin_pages = array( 'wp-polls/polls-manager.php', 'wp-polls/polls-add.php', 'wp-polls/polls-options.php', 'wp-polls/polls-templates.php', 'wp-polls/polls-uninstall.php' );
 
 		if( in_array( $hook_suffix, $poll_admin_pages ) ) {
-			wp_enqueue_style( 'wp-polls-admin', plugins_url('wp-polls/polls-admin-css.css'), false, '2.63', 'all' );
-			wp_enqueue_script( 'wp-polls-admin', plugins_url('wp-polls/polls-admin-js.js'), array('jquery'), '2.63', true );
+			wp_enqueue_style( 'wp-polls-admin', plugins_url('wp-polls/polls-admin-css.css'), false, WP_POLLS_VERSION, 'all' );
+			wp_enqueue_script( 'wp-polls-admin', plugins_url('wp-polls/polls-admin-js.js'), array('jquery'), WP_POLLS_VERSION, true );
 
 			wp_localize_script( 'wp-polls-admin', 'pollsAdminL10n', array(
 				'admin_ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -94,8 +94,8 @@ class Polls_Admin {
 		}
 
 		if( get_user_option('rich_editing') == 'true' ) {
-			add_filter( 'mce_external_plugins', array( 'poll_tinymce_addplugin' ) );
-			add_filter( 'mce_buttons', 'poll_tinymce_registerbutton' );
+			add_filter( 'mce_external_plugins', array( &$this, 'poll_tinymce_addplugin' ) );
+			add_filter( 'mce_buttons', array( &$this, 'poll_tinymce_registerbutton' ) );
 		}
 	}
 
