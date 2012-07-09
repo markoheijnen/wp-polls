@@ -1,8 +1,8 @@
 === WP-Polls ===
-Contributors: GamerZ
+Contributors: GamerZ, MarkoHeijnen
 Donate link: http://lesterchan.net/site/donation/
 Tags: poll, polls, polling, vote, booth, democracy, ajax, survey, post, widget
-Requires at least: 2.8
+Requires at least: 3.3
 Tested up to: 3.3.1
 Stable tag: trunk
 
@@ -13,6 +13,7 @@ Adds an AJAX poll system to your WordPress blog. You can also easily add a poll 
 WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
 
 = Previous Versions =
+* [WP-Polls 2.63 For WordPress 2.8-3.1.3](http://downloads.wordpress.org/plugin/wp-polls.2.63.zip "WP-Polls 2.63 For WordPress 2.8-3.1.3")
 * [WP-Polls 2.40 For WordPress 2.7.x](http://downloads.wordpress.org/plugin/wp-polls.2.40.zip "WP-Polls 2.40 For WordPress 2.7.x")
 * [WP-Polls 2.31 For WordPress 2.5.x And 2.6.x](http://downloads.wordpress.org/plugin/wp-polls.2.31.zip "WP-Polls 2.31 For WordPress 2.5.x And 2.6.x")
 * [WP-Polls 2.20 For WordPress 2.1.x, 2.2.x And 2.3.x](http://downloads.wordpress.org/plugin/wp-polls.2.20.zip "WP-Polls 2.20 For WordPress 2.1.x, 2.2.x And 2.3.x")
@@ -36,6 +37,9 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 * I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appericiate it. If not feel free to use it without any obligations.
 
 == Changelog ==
+
+= Version 3.0 (10-07-2012) =
+
 
 = Version 2.63 (21-05-2012) =
 * Move AJAX Request to wp-admin/admin-ajax.php
