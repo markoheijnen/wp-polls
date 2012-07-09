@@ -31,71 +31,86 @@ $id = (isset($_GET['id']) ? intval($_GET['id']) : 0);
 ### If Form Is Submitted
 if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 	check_admin_referer('wp-polls_options');
-	$poll_bar_style = strip_tags(trim($_POST['poll_bar_style']));
-	$poll_bar_background = strip_tags(trim($_POST['poll_bar_bg']));
-	$poll_bar_border = strip_tags(trim($_POST['poll_bar_border']));
-	$poll_bar_height = intval($_POST['poll_bar_height']);
-	$poll_bar = array('style' => $poll_bar_style, 'background' => $poll_bar_background, 'border' => $poll_bar_border, 'height' => $poll_bar_height);
-	$poll_ajax_style = array('loading' => intval($_POST['poll_ajax_style_loading']), 'fading' => intval($_POST['poll_ajax_style_fading']));
-	$poll_ans_sortby = strip_tags(trim($_POST['poll_ans_sortby']));
-	$poll_ans_sortorder = strip_tags(trim($_POST['poll_ans_sortorder']));
-	$poll_ans_result_sortby = strip_tags(trim($_POST['poll_ans_result_sortby']));
-	$poll_ans_result_sortorder = strip_tags(trim($_POST['poll_ans_result_sortorder']));
-	$poll_archive_perpage = intval($_POST['poll_archive_perpage']);
-	$poll_archive_displaypoll = intval($_POST['poll_archive_displaypoll']);
-	$poll_archive_url = strip_tags(trim($_POST['poll_archive_url']));
-	$poll_archive_show = intval($_POST['poll_archive_show']);
-	$poll_currentpoll = intval($_POST['poll_currentpoll']);
-	$poll_close = intval($_POST['poll_close']);
-	$poll_logging_method = intval($_POST['poll_logging_method']);
-	$poll_cookielog_expiry = intval($_POST['poll_cookielog_expiry']);
-	$poll_allowtovote = intval($_POST['poll_allowtovote']);
-	$update_poll_queries = array();
-	$update_poll_text = array();	
-	$update_poll_queries[] = update_option('poll_bar', $poll_bar);
-	$update_poll_queries[] = update_option('poll_ajax_style', $poll_ajax_style);
-	$update_poll_queries[] = update_option('poll_ans_sortby', $poll_ans_sortby);
-	$update_poll_queries[] = update_option('poll_ans_sortorder', $poll_ans_sortorder);
-	$update_poll_queries[] = update_option('poll_ans_result_sortby', $poll_ans_result_sortby);
-	$update_poll_queries[] = update_option('poll_ans_result_sortorder', $poll_ans_result_sortorder);
-	$update_poll_queries[] = update_option('poll_archive_perpage', $poll_archive_perpage);
-	$update_poll_queries[] = update_option('poll_archive_displaypoll', $poll_archive_displaypoll);
-	$update_poll_queries[] = update_option('poll_archive_url', $poll_archive_url);
-	$update_poll_queries[] = update_option('poll_archive_show', $poll_archive_show);
-	$update_poll_queries[] = update_option('poll_currentpoll', $poll_currentpoll);
-	$update_poll_queries[] = update_option('poll_close', $poll_close);
-	$update_poll_queries[] = update_option('poll_logging_method', $poll_logging_method);
-	$update_poll_queries[] = update_option('poll_cookielog_expiry', $poll_cookielog_expiry);
-	$update_poll_queries[] = update_option('poll_allowtovote', $poll_allowtovote);
-	$update_poll_text[] = __('Poll Bar Style', 'wp-polls');
-	$update_poll_text[] = __('Poll AJAX Style', 'wp-polls');
-	$update_poll_text[] = __('Sort Poll Answers By Option', 'wp-polls');
-	$update_poll_text[] = __('Sort Order Of Poll Answers Option', 'wp-polls');
-	$update_poll_text[] = __('Sort Poll Results By Option', 'wp-polls');
-	$update_poll_text[] = __('Sort Order Of Poll Results Option', 'wp-polls');
-	$update_poll_text[] = __('Number Of Polls Per Page To Display In Poll Archive Option', 'wp-polls');
-	$update_poll_text[] = __('Type Of Polls To Display In Poll Archive Option', 'wp-polls');
-	$update_poll_text[] = __('Poll Archive URL Option', 'wp-polls');
-	$update_poll_text[] = __('Show Poll Achive Link Option', 'wp-polls');
-	$update_poll_text[] = __('Current Active Poll Option', 'wp-polls');
-	$update_poll_text[] = __('Poll Close Option', 'wp-polls');
-	$update_poll_text[] = __('Logging Method', 'wp-polls');
-	$update_poll_text[] = __('Cookie And Log Expiry Option', 'wp-polls');
-	$update_poll_text[] = __('Allow To Vote Option', 'wp-polls');
+
+	$poll_bar_style            = strip_tags( trim( $_POST['poll_bar_style'] ) );
+	$poll_bar_background       = strip_tags( trim( $_POST['poll_bar_bg'] ) );
+	$poll_bar_border           = strip_tags( trim( $_POST['poll_bar_border'] ) );
+	$poll_bar_height           = intval( $_POST['poll_bar_height'] );
+	$poll_bar                  = array( 'style' => $poll_bar_style, 'background' => $poll_bar_background, 'border' => $poll_bar_border, 'height' => $poll_bar_height );
+	$poll_ajax_style           = array( 'loading' => intval( $_POST['poll_ajax_style_loading'] ), 'fading' => intval( $_POST['poll_ajax_style_fading'] ) );
+	$poll_ans_sortby           = strip_tags( trim( $_POST['poll_ans_sortby'] ) );
+	$poll_ans_sortorder        = strip_tags( trim( $_POST['poll_ans_sortorder'] ) );
+	$poll_ans_result_sortby    = strip_tags( trim( $_POST['poll_ans_result_sortby'] ) );
+	$poll_ans_result_sortorder = strip_tags( trim( $_POST['poll_ans_result_sortorder'] ) );
+	$poll_archive_perpage      = intval( $_POST['poll_archive_perpage'] );
+	$poll_archive_displaypoll  = intval( $_POST['poll_archive_displaypoll'] );
+	$poll_archive_url          = strip_tags( trim( $_POST['poll_archive_url'] ) );
+	$poll_archive_show         = intval( $_POST['poll_archive_show'] );
+	$poll_currentpoll          = intval( $_POST['poll_currentpoll'] );
+	$poll_close                = intval( $_POST['poll_close'] );
+	$poll_logging_method       = intval( $_POST['poll_logging_method'] );
+	$poll_cookielog_expiry     = intval( $_POST['poll_cookielog_expiry'] );
+	$poll_allowtovote          = intval( $_POST['poll_allowtovote'] );
+	$spam_captcha              = intval( $_POST['poll_spam_captcha'] );
+	$spam_ajax_only            = intval( $_POST['poll_spam_ajax_only'] );
+
+	$update_poll_queries   = array();
+	$update_poll_text      = array();
+
+	$update_poll_queries[] = update_option( 'poll_bar', $poll_bar );
+	$update_poll_queries[] = update_option( 'poll_ajax_style', $poll_ajax_style );
+	$update_poll_queries[] = update_option( 'poll_ans_sortby', $poll_ans_sortby );
+	$update_poll_queries[] = update_option( 'poll_ans_sortorder', $poll_ans_sortorder );
+	$update_poll_queries[] = update_option( 'poll_ans_result_sortby', $poll_ans_result_sortby );
+	$update_poll_queries[] = update_option( 'poll_ans_result_sortorder', $poll_ans_result_sortorder );
+	$update_poll_queries[] = update_option( 'poll_archive_perpage', $poll_archive_perpage );
+	$update_poll_queries[] = update_option( 'poll_archive_displaypoll', $poll_archive_displaypoll );
+	$update_poll_queries[] = update_option( 'poll_archive_url', $poll_archive_url );
+	$update_poll_queries[] = update_option( 'poll_archive_show', $poll_archive_show );
+	$update_poll_queries[] = update_option( 'poll_currentpoll', $poll_currentpoll );
+	$update_poll_queries[] = update_option( 'poll_close', $poll_close );
+	$update_poll_queries[] = update_option( 'poll_logging_method', $poll_logging_method );
+	$update_poll_queries[] = update_option( 'poll_cookielog_expiry', $poll_cookielog_expiry );
+	$update_poll_queries[] = update_option( 'poll_allowtovote', $poll_allowtovote );
+	$update_poll_queries[] = update_option( 'poll_spam_captcha', $spam_captcha );
+	$update_poll_queries[] = update_option( 'poll_spam_ajax_only', $spam_ajax_only );
+
+	$update_poll_text[] = __( 'Poll Bar Style', 'wp-polls' );
+	$update_poll_text[] = __( 'Poll AJAX Style', 'wp-polls' );
+	$update_poll_text[] = __( 'Sort Poll Answers By Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Sort Order Of Poll Answers Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Sort Poll Results By Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Sort Order Of Poll Results Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Number Of Polls Per Page To Display In Poll Archive Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Type Of Polls To Display In Poll Archive Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Poll Archive URL Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Show Poll Achive Link Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Current Active Poll Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Poll Close Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Logging Method', 'wp-polls' );
+	$update_poll_text[] = __( 'Cookie And Log Expiry Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Allow To Vote Option', 'wp-polls' );
+	$update_poll_text[] = __( 'Show captcha', 'wp-polls' );
+	$update_poll_text[] = __( 'Ajax only', 'wp-polls' );
+
 	$i=0;
 	$text = '';
-	foreach($update_poll_queries as $update_poll_query) {
-		if($update_poll_query) {
+	foreach( $update_poll_queries as $update_poll_query ) {
+		if( $update_poll_query) {
 			$text .= '<font color="green">'.$update_poll_text[$i].' '.__('Updated', 'wp-polls').'</font><br />';
 		}
+
 		$i++;
 	}
+
 	if(empty($text)) {
 		$text = '<font color="red">'.__('No Poll Option Updated', 'wp-polls').'</font>';
 	}
+
 	cron_polls_place();
 }
 ?>
+
 <script type="text/javascript">
 /* <![CDATA[*/
 	function set_pollbar_height(height) {
@@ -375,6 +390,34 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 					<option value="1"<?php selected(1, get_option('poll_close')); ?>><?php _e('Display Poll\'s Results', 'wp-polls'); ?></option>
 					<option value="3"<?php selected(3, get_option('poll_close')); ?>><?php _e('Display Disabled Poll\'s Voting Form', 'wp-polls'); ?></option>
 					<option value="2"<?php selected(2, get_option('poll_close')); ?>><?php _e('Do Not Display Poll In Post/Sidebar', 'wp-polls'); ?></option>		
+				</select>
+			</td>
+		</tr>
+	</table>
+
+
+	<?php
+	$spam_captcha   = get_option('poll_spam_captcha');
+	$spam_ajax_only = get_option('poll_spam_ajax_only');
+	?>
+	<!-- Current Active Poll -->
+	<h3><?php _e( 'Spam Control', 'wp-polls' ); ?></h3>
+	<table class="form-table">
+		<tr>
+			<th scope="row" valign="top"><?php _e( 'Show captcha', 'wp-polls' ); ?></th>
+			<td>
+				<select name="poll_spam_captcha" size="1">
+					<option value="0"<?php selected( '0', $spam_captcha ); ?>><?php _e( 'No', 'wp-polls' ); ?></option>
+					<option value="1"<?php selected( '1', $spam_captcha ); ?>><?php _e( 'Yes', 'wp-polls' ); ?></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row" valign="top"><?php _e( 'AJAX only', 'wp-polls' ); ?></th>
+			<td>
+				<select name="poll_spam_ajax_only" size="1">
+					<option value="0"<?php selected( '0', $spam_ajax_only ); ?>><?php _e( 'No', 'wp-polls' ); ?></option>
+					<option value="1"<?php selected( '1', $spam_ajax_only ); ?>><?php _e( 'Yes', 'wp-polls' ); ?></option>
 				</select>
 			</td>
 		</tr>
