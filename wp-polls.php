@@ -143,16 +143,21 @@ class WP_Polls {
 	}
 
 	### Function: Short Code For Inserting Polls Into Posts
-	function poll_shortcode($atts) {
-		extract(shortcode_atts(array('id' => 0, 'type' => 'vote'), $atts));
-		if(!is_feed()) {
-			$id = intval($id);
-			if($type == 'vote') {
-				return get_poll($id, false);
-			} elseif($type == 'result') {
-				return display_pollresult($id);
+	function poll_shortcode( $atts ) {
+		extract( shortcode_atts( array( 'id' => 0, 'type' => 'vote' ), $atts ) );
+
+		do_action( 'wp_poll_loaded', $id, $type );
+
+		if( ! is_feed() ) {
+			$id = intval( $id );
+			if( $type == 'vote' ) {
+				return get_poll( $id, false );
 			}
-		} else {
+			elseif( $type == 'result' ) {
+				return display_pollresult( $id );
+			}
+		}
+		else {
 			return __('Note: There is a poll embedded within this post, please visit the site to participate in this post\'s poll.', 'wp-polls');
 		}
 	}
@@ -406,18 +411,29 @@ function display_pollvote($poll_id, $display_loading = true) {
 	$template_question = str_replace("%POLL_TOTALVOTERS%", $poll_question_totalvoters, $template_question);
 	$template_question = str_replace("%POLL_START_DATE%", $poll_start_date, $template_question);
 	$template_question = str_replace("%POLL_END_DATE%", $poll_end_date, $template_question);
+
 	if($poll_multiple_ans > 0) {
 		$template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", $poll_multiple_ans, $template_question);
 	} else {
 		$template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", '1', $template_question);
 	}
+
 	// Get Poll Answers Data
 	$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY ".get_option('poll_ans_sortby').' '.get_option('poll_ans_sortorder'));
 	// If There Is Poll Question With Answers
 	if($poll_question && $poll_answers) {
+		$ajax_only = get_option('poll_spam_ajax_only');
+
 		// Display Poll Voting Form
 		$temp_pollvote .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
-		$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"".htmlspecialchars($_SERVER['REQUEST_URI'])."\" method=\"post\">\n";
+
+		if( $ajax_only == 1 ) {
+			$temp_pollvote .= "\t<div id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\">\n";
+		}
+		else {
+			$temp_pollvote .= "\t<form id=\"polls_form_$poll_question_id\" class=\"wp-polls-form\" action=\"".htmlspecialchars($_SERVER['REQUEST_URI'])."\" method=\"post\">\n";
+		}
+
 		$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" id=\"poll_{$poll_question_id}_nonce\" name=\"wp-polls-nonce\" value=\"".wp_create_nonce('poll_'.$poll_question_id.'-nonce')."\" /></p>\n";
 		$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" name=\"poll_id\" value=\"$poll_question_id\" /></p>\n";
 		if($poll_multiple_ans > 0) {
@@ -454,19 +470,35 @@ function display_pollvote($poll_id, $display_loading = true) {
 			}
 		}
 		// Voting Form Footer Variables
-		$template_footer = stripslashes(get_option('poll_template_votefooter'));
-		$template_footer = str_replace("%POLL_ID%", $poll_question_id, $template_footer);
-		$template_footer = str_replace("%POLL_RESULT_URL%", $poll_result_url, $template_footer);
-		$template_footer = str_replace("%POLL_START_DATE%", $poll_start_date, $template_footer);
-		$template_footer = str_replace("%POLL_END_DATE%", $poll_end_date, $template_footer);
+		$template_footer = stripslashes( get_option('poll_template_votefooter') );
+		$template_footer = str_replace( "%POLL_ID%", $poll_question_id, $template_footer );
+		$template_footer = str_replace( "%POLL_RESULT_URL%", $poll_result_url, $template_footer );
+		$template_footer = str_replace( "%POLL_START_DATE%", $poll_start_date, $template_footer );
+		$template_footer = str_replace( "%POLL_END_DATE%", $poll_end_date, $template_footer );
 		if($poll_multiple_ans > 0) {
 			$template_footer = str_replace("%POLL_MULTIPLE_ANS_MAX%", $poll_multiple_ans, $template_footer);
 		} else {
 			$template_footer = str_replace("%POLL_MULTIPLE_ANS_MAX%", '1', $template_footer);
 		}
+
+		if( '1' == get_option('poll_spam_captcha') ) {
+			$captcha_url = plugins_url( 'securimage/securimage_show.php', __FILE__ );
+
+			$temp_pollvote .= '<img id="captcha" src="' . $captcha_url . '" alt="' . __( 'CAPTCHA Image', 'wp-polls' ) . '" /><br/>';
+			$temp_pollvote .= '<input type="text" name="captcha_code" size="13" maxlength="6" />';
+			$temp_pollvote .= ' <a href="#" onclick="document.getElementById(\'captcha\').src = \'/' . $captcha_url . '?\' + Math.random(); return false">[ ' . __( 'Different Image', 'wp-polls' ) . ' ]</a>';
+		}
+
 		// Print Out Voting Form Footer Template
 		$temp_pollvote .= "\t\t$template_footer\n";
-		$temp_pollvote .= "\t</form>\n";
+
+		if( $ajax_only == 1 ) {
+			$temp_pollvote .= "\t</div>\n";
+		}
+		else {
+			$temp_pollvote .= "\t</form>\n";
+		}
+
 		$temp_pollvote .= "</div>\n";
 		if($display_loading) {
 			$poll_ajax_style = get_option('poll_ajax_style');
@@ -1205,7 +1237,6 @@ function vote_poll() {
 	if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'polls')
 	{
 		// Load Headers
-		polls_textdomain();
 		header('Content-Type: text/html; charset='.get_option('blog_charset').'');		
 		
 		// Get Poll ID
@@ -1403,7 +1434,6 @@ function manage_poll() {
 add_action('activate_wp-polls/wp-polls.php', 'create_poll_table');
 function create_poll_table() {
 	global $wpdb;
-	polls_textdomain();
 	if(@is_file(ABSPATH.'/wp-admin/includes/upgrade.php')) {
 		include_once(ABSPATH.'/wp-admin/includes/upgrade.php');
 	}elseif(@is_file(ABSPATH.'/wp-admin/upgrade-functions.php')) {
