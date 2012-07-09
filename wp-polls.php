@@ -38,6 +38,8 @@ class WP_Polls {
 	private $poll_loaded = false;
 
 	function __construct() {
+		new Polls_Admin();
+
 		add_action( 'plugins_loaded', array( &$this, 'init_database_vars' ) );
 		add_action( 'init', array( &$this, 'polls_textdomain' ) );
 
@@ -46,7 +48,8 @@ class WP_Polls {
 		add_action( 'wp_head', array( &$this, 'poll_head_scripts' ) );
 		add_action( 'wp_poll_loaded', array( &$this, 'poll_scripts' ) );
 
-		new Polls_Admin();
+		add_shortcode( 'page_polls', array( &$this, 'poll_page_shortcode' ) );
+		add_shortcode( 'poll', array( &$this, 'poll_shortcode' ) );
 	}
 
 	### Polls Table Name
@@ -129,6 +132,29 @@ class WP_Polls {
 			'show_loading' => intval( $poll_ajax_style['loading'] ),
 			'show_fading' => intval( $poll_ajax_style['fading'] )
 		));
+	}
+
+
+
+
+	### Function: Short Code For Inserting Polls Archive Into Page
+	function poll_page_shortcode($atts) {
+		return polls_archive();
+	}
+
+	### Function: Short Code For Inserting Polls Into Posts
+	function poll_shortcode($atts) {
+		extract(shortcode_atts(array('id' => 0, 'type' => 'vote'), $atts));
+		if(!is_feed()) {
+			$id = intval($id);
+			if($type == 'vote') {
+				return get_poll($id, false);
+			} elseif($type == 'result') {
+				return display_pollresult($id);
+			}
+		} else {
+			return __('Note: There is a poll embedded within this post, please visit the site to participate in this post\'s poll.', 'wp-polls');
+		}
 	}
 }
 
@@ -644,30 +670,6 @@ if(!function_exists('get_ipaddress')) {
 			$ip_address = $ip_address[0];
 		}
 		return esc_attr($ip_address);
-	}
-}
-
-
-### Function: Short Code For Inserting Polls Archive Into Page
-add_shortcode('page_polls', 'poll_page_shortcode');
-function poll_page_shortcode($atts) {
-	return polls_archive();
-}
-
-
-### Function: Short Code For Inserting Polls Into Posts
-add_shortcode('poll', 'poll_shortcode');
-function poll_shortcode($atts) {
-	extract(shortcode_atts(array('id' => 0, 'type' => 'vote'), $atts));
-	if(!is_feed()) {
-		$id = intval($id);
-		if($type == 'vote') {
-			return get_poll($id, false);
-		} elseif($type == 'result') {
-			return display_pollresult($id);
-		}
-	} else {
-		return __('Note: There is a poll embedded within this post, please visit the site to participate in this post\'s poll.', 'wp-polls');
 	}
 }
 
