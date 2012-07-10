@@ -20,10 +20,10 @@
 var poll_id = 0;
 var poll_answer_id = '';
 var is_being_voted = false;
-pollsL10n.show_loading = parseInt(pollsL10n.show_loading);
-pollsL10n.show_fading = parseInt(pollsL10n.show_fading);
+pollsL10n.show_loading = parseInt( pollsL10n.show_loading, 10 );
+pollsL10n.show_fading = parseInt( pollsL10n.show_fading, 10 );
 
-// When User Vote For Poll 
+// When User Vote For Poll
 function poll_vote(current_poll_id) {
 	if(!is_being_voted) {
 		set_is_being_voted(true);
@@ -32,15 +32,15 @@ function poll_vote(current_poll_id) {
 		poll_multiple_ans = 0;
 		poll_multiple_ans_count = 0;
 		if(jQuery('#poll_multiple_ans_' + poll_id).length) {
-			poll_multiple_ans = parseInt(jQuery('#poll_multiple_ans_' + poll_id).val());
+			poll_multiple_ans = parseInt( jQuery('#poll_multiple_ans_' + poll_id).val(), 10 );
 		}
 		jQuery('#polls_form_' + poll_id + ' input:checkbox, #polls_form_' + poll_id + ' input:radio').each(function(i){
-			if (jQuery(this).is(':checked')) {					
+			if (jQuery(this).is(':checked')) {
 				if(poll_multiple_ans > 0) {
 					poll_answer_id = jQuery(this).val() + ',' + poll_answer_id;
 					poll_multiple_ans_count++;
 				} else {
-					poll_answer_id = parseInt(jQuery(this).val());
+					poll_answer_id = parseInt( jQuery(this).val(), 10 );
 				}
 			}
 		});
@@ -48,7 +48,7 @@ function poll_vote(current_poll_id) {
 			if(poll_multiple_ans_count > 0 && poll_multiple_ans_count <= poll_multiple_ans) {
 				poll_answer_id = poll_answer_id.substring(0, (poll_answer_id.length-1));
 				poll_process();
-			} else if(poll_multiple_ans_count == 0) {
+			} else if(poll_multiple_ans_count === 0) {
 				set_is_being_voted(false);
 				alert(pollsL10n.text_valid);
 			} else {
@@ -70,20 +70,23 @@ function poll_vote(current_poll_id) {
 
 // Process Poll (User Click "Vote" Button)
 function poll_process() {
-	poll_nonce = jQuery('#poll_' + poll_id + '_nonce').val();
 	if(pollsL10n.show_fading) {
 		jQuery('#polls-' + poll_id).fadeTo('def', 0, function () {
-			if(pollsL10n.show_loading) {
-				jQuery('#polls-' + poll_id + '-loading').show();
-			}
-			jQuery.ajax({type: 'POST', url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+			_perform_request();
 		});
 	} else {
-		if(pollsL10n.show_loading) {
-			jQuery('#polls-' + poll_id + '-loading').show();
-		}
-		jQuery.ajax({type: 'POST', url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id + '&poll_' + poll_id + '_nonce=' + poll_nonce, cache: false, success: poll_process_success});
+		_perform_request();
 	}
+}
+
+function _perform_request() {
+	poll_nonce = jQuery('#poll_' + poll_id + '_nonce').val();
+	poll_captcha = jQuery('#captcha_code-' + poll_id ).val();
+
+	if( pollsL10n.show_loading ) {
+		jQuery('#polls-' + poll_id + '-loading').show();
+	}
+	jQuery.ajax({type: 'POST', url: pollsL10n.ajax_url, data: 'action=polls&view=process&poll_id=' + poll_id + '&poll_' + poll_id + '=' + poll_answer_id + '&poll_' + poll_id + '_nonce=' + poll_nonce + '&poll_' + poll_id +  '_captcha=' + poll_captcha, cache: false, success: poll_process_success});
 }
 
 // Poll's Result (User Click "View Results" Link)
@@ -141,11 +144,11 @@ function poll_process_success(data) {
 		jQuery('#polls-' + poll_id + '-loading').hide();
 	}
 	if(pollsL10n.show_fading) {
-		jQuery('#polls-' + poll_id).fadeTo('def', 1, function () {		
-			set_is_being_voted(false);	
+		jQuery('#polls-' + poll_id).fadeTo('def', 1, function () {
+			set_is_being_voted(false);
 		});
 	} else {
-		set_is_being_voted(false);	
+		set_is_being_voted(false);
 	}
 }
 
