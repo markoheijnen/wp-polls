@@ -35,55 +35,56 @@ class WP_Polls_Poll {
 			switch( $this->poll_id ) {
 				// Random Poll
 				case -2:
-					$poll_id = $wpdb->get_var("SELECT pollq_id FROM $wpdb->pollsq WHERE pollq_active = 1 ORDER BY RAND() LIMIT 1");
+					$this->poll_id = $wpdb->get_var("SELECT pollq_id FROM $wpdb->pollsq WHERE pollq_active = 1 ORDER BY RAND() LIMIT 1");
 					break;
 				// Latest Poll
 				case 0:
 					// Random Poll
 					if(intval(get_option('poll_currentpoll')) == -2) {
 						$random_poll_id = $wpdb->get_var("SELECT pollq_id FROM $wpdb->pollsq WHERE pollq_active = 1 ORDER BY RAND() LIMIT 1");
-						$poll_id = intval($random_poll_id);
-						if($pollresult_id > 0) {
-							$poll_id = $pollresult_id;
-						} elseif(intval($_POST['poll_id']) > 0) {
-							$poll_id = intval($_POST['poll_id']);
+						$this->poll_id = intval( $random_poll_id );
+
+						if( $pollresult_id > 0 ) {
+							$this->poll_id = $pollresult_id;
+						}
+						elseif( intval( $_POST['poll_id'] ) > 0) {
+							$this->poll_id = intval( $_POST['poll_id'] );
 						}
 					// Current Poll ID Is Not Specified
 					} elseif(intval(get_option('poll_currentpoll')) == 0) {
 						// Get Lastest Poll ID
-						$poll_id = intval(get_option('poll_latestpoll'));
+						$this->poll_id = intval(get_option('poll_latestpoll'));
 					} else {
 						// Get Current Poll ID
-						$poll_id = intval(get_option('poll_currentpoll'));
+						$this->poll_id = intval(get_option('poll_currentpoll'));
 					}
 					break;
-				// Take Poll ID From Arguments
-				default:
-					$poll_id = $this->poll_id;
 			}
 		}
 
 		// Assign All Loaded Poll To $polls_loaded
-		if(empty($polls_loaded)) {
+		if( empty( $polls_loaded ) ) {
 			$polls_loaded = array();
 		}
-		if(!in_array($poll_id, $polls_loaded)) {
-			$polls_loaded[] = $poll_id;
+		if( ! in_array( $this->poll_id, $polls_loaded ) ) {
+			$polls_loaded[] = $this->poll_id;
 		}
 
 		// User Click on View Results Link
-		if($pollresult_id == $poll_id) {
-			if($display) {
-				echo display_pollresult($poll_id);
+		if( $pollresult_id == $this->poll_id ) {
+			if( $display ) {
+				echo display_pollresult( $this->poll_id );
 				return;
-			} else {
-				return display_pollresult($poll_id);
+			}
+			else {
+				return display_pollresult( $this->poll_id );
 			}
 		// Check Whether User Has Voted
-		} else {
-			$poll_active = $wpdb->get_var("SELECT pollq_active FROM $wpdb->pollsq WHERE pollq_id = $poll_id");
+		}
+		else {
+			$poll_active = $wpdb->get_var( "SELECT pollq_active FROM $wpdb->pollsq WHERE pollq_id = " . $this->poll_id );
 			$poll_active = intval( $poll_active );
-			$check_voted = $this->check_voted( $poll_id );
+			$check_voted = $this->check_voted();
 			if($poll_active == 0) {
 				$poll_close = intval(get_option('poll_close'));
 			} else {
@@ -91,25 +92,25 @@ class WP_Polls_Poll {
 			}
 			if(intval($check_voted) > 0 || (is_array($check_voted) && sizeof($check_voted) > 0) || ($poll_active == 0 && $poll_close == 1)) {
 				if($display) {
-					echo display_pollresult($poll_id, $check_voted);
+					echo display_pollresult( $this->poll_id, $check_voted );
 					return;
 				} else {
-					return display_pollresult($poll_id, $check_voted);
+					return display_pollresult( $this->poll_id, $check_voted);
 				}
 			} elseif( ! $this->check_allowtovote() || ( $poll_active == 0 && $poll_close == 3 ) ) {
-				$disable_poll_js = '<script type="text/javascript">jQuery("#polls_form_'.$poll_id.' :input").each(function (i){jQuery(this).attr("disabled","disabled")});</script>';
+				$disable_poll_js = '<script type="text/javascript">jQuery("#polls_form_' . $this->poll_id . ' :input").each(function (i){jQuery(this).attr("disabled","disabled")});</script>';
 				if($display) {
-					echo $this->display_pollvote( $poll_id ) . $disable_poll_js;
+					echo $this->display_pollvote( $this->poll_id ) . $disable_poll_js;
 					return;
 				} else {
-					return $this->display_pollvote( $poll_id ) . $disable_poll_js;
+					return $this->display_pollvote( $this->poll_id ) . $disable_poll_js;
 				}			
 			} elseif($poll_active == 1) {
 				if($display) {
-					echo $this->display_pollvote( $poll_id );
+					echo $this->display_pollvote( $this->poll_id );
 					return;
 				} else {
-					return $this->display_pollvote( $poll_id );
+					return $this->display_pollvote( $this->poll_id );
 				}
 			}
 		}
@@ -119,21 +120,30 @@ class WP_Polls_Poll {
 		global $wpdb, $user_identity, $user_ID;
 
 		// Which View
-		switch($_REQUEST['view'])
+		switch( $_REQUEST['view'] )
 		{
 			// Poll Vote
-			case 'process':				
+			case 'process':
+				// Verify Captcha
+				$securimage = new Securimage();
+				if( $securimage->check( $_POST['poll_' . $this->poll_id . '_captcha'] ) == false) {
+					_e( "You didn't fill in the Captcha correctly", 'wp-polls' );
+					exit();
+				}
+
 				$poll_aid = $_POST["poll_" . $this->poll_id];
 				$poll_aid_array = array_unique(array_map('intval', explode(',', $poll_aid)));
 				if( $this->poll_id > 0 && ! empty( $poll_aid_array ) && $this->check_allowtovote() ) {
-					$check_voted = $this->check_voted( $this->poll_id );
+					$check_voted = $this->check_voted();
 
 					if( $check_voted == 0 ) {
-						if(!empty($user_identity)) {
-							$pollip_user = htmlspecialchars(addslashes($user_identity));
-						} elseif(!empty($_COOKIE['comment_author_'.COOKIEHASH])) {
-							$pollip_user = htmlspecialchars(addslashes($_COOKIE['comment_author_'.COOKIEHASH]));
-						} else {
+						if( ! empty( $user_identity ) ) {
+							$pollip_user = htmlspecialchars( addslashes( $user_identity ) );
+						}
+						elseif( ! empty( $_COOKIE['comment_author_' . COOKIEHASH] ) ) {
+							$pollip_user = htmlspecialchars( addslashes( $_COOKIE['comment_author_' . COOKIEHASH] ) );
+						}
+						else {
 							$pollip_user = __('Guest', 'wp-polls');
 						}
 
@@ -141,6 +151,7 @@ class WP_Polls_Poll {
 						$pollip_ip = get_ipaddress();
 						$pollip_host = esc_attr(@gethostbyaddr($pollip_ip));
 						$pollip_timestamp = current_time('timestamp');
+
 						// Only Create Cookie If User Choose Logging Method 1 Or 2
 						$poll_logging_method = intval(get_option('poll_logging_method'));
 						if($poll_logging_method == 1 || $poll_logging_method == 3) {
@@ -150,6 +161,7 @@ class WP_Polls_Poll {
 							}
 							$vote_cookie = setcookie( 'voted_' . $this->poll_id, $poll_aid, ($pollip_timestamp + $cookie_expiry), COOKIEPATH );						
 						}
+
 						$i = 0;
 						foreach($poll_aid_array as $polla_aid) {
 							$update_polla_votes = $wpdb->query("UPDATE $wpdb->pollsa SET polla_votes = (polla_votes+1) WHERE polla_qid = $this->poll_id AND polla_aid = $polla_aid");
@@ -158,29 +170,34 @@ class WP_Polls_Poll {
 							}
 							$i++;
 						}
+
 						$vote_q = $wpdb->query("UPDATE $wpdb->pollsq SET pollq_totalvotes = (pollq_totalvotes+".sizeof($poll_aid_array)."), pollq_totalvoters = (pollq_totalvoters+1) WHERE pollq_id = $this->poll_id AND pollq_active = 1");
 						if($vote_q) {
 							foreach($poll_aid_array as $polla_aid) {
 								$wpdb->query("INSERT INTO $wpdb->pollsip VALUES (0, $this->poll_id, $polla_aid, '$pollip_ip', '$pollip_host', '$pollip_timestamp', '$pollip_user', $pollip_userid)");
 							}
 							echo $this->display_pollresult( $this->poll_id, $poll_aid_array, false );
-						} else {
+						}
+						else {
 							printf( __('Unable To Update Poll Total Votes And Poll Total Voters. Poll ID #%s', 'wp-polls'), $this->poll_id );
 						} // End if($vote_a)
-					} else {
+					}
+					else {
 						printf( __('You Had Already Voted For This Poll. Poll ID #%s', 'wp-polls'), $this->poll_id );
 					}// End if($check_voted)
-				} else {
+				}
+				else {
 					printf( __('Invalid Poll ID. Poll ID #%s', 'wp-polls'), $this->poll_id );
-				} // End if($poll_id > 0 && !empty($poll_aid_array) && check_allowtovote())
+				}
+
 				break;
 			// Poll Result
 			case 'result':
-				echo display_pollresult($poll_id, 0, false);
+				echo $this->display_pollresult( $this->poll_id, 0, false );
 				break;
 			// Poll Booth Aka Poll Voting Form
 			case 'booth':
-				echo display_pollvote($poll_id, false);
+				echo $this->display_pollvote( $this->poll_id, false );
 				break;
 		} // End switch($_REQUEST['view'])
 	}
@@ -215,7 +232,7 @@ class WP_Polls_Poll {
 	}
 
 	### Funcrion: Check Voted By Cookie Or IP
-	function check_voted( $poll_id ) {
+	private function check_voted() {
 		$poll_logging_method = intval( get_option('poll_logging_method') );
 
 		switch( $poll_logging_method ) {
@@ -225,34 +242,34 @@ class WP_Polls_Poll {
 				break;
 			// Logged By Cookie
 			case 1:
-				return $this->check_voted_cookie( $poll_id );
+				return $this->check_voted_cookie();
 				break;
 			// Logged By IP
 			case 2:
-				return $this->check_voted_ip( $poll_id );
+				return $this->check_voted_ip();
 				break;
 			// Logged By Cookie And IP
 			case 3:
-				$check_voted_cookie = $this->check_voted_cookie( $poll_id );
+				$check_voted_cookie = $this->check_voted_cookie();
 
 				if( ! empty( $check_voted_cookie ) ) {
 					return $check_voted_cookie;
 				}
 				else {
-					return $this->check_voted_ip( $poll_id );
+					return $this->check_voted_ip();
 				}
 				break;
 			// Logged By Username
 			case 4:
-				return $this->check_voted_username( $poll_id );
+				return $this->check_voted_username();
 				break;
 		}
 	}
 
 	### Function: Check Voted By Cookie
-	function check_voted_cookie( $poll_id ) {
-		if( ! empty( $_COOKIE["voted_$poll_id"] ) ) {
-			$get_voted_aids = explode( ',', $_COOKIE["voted_$poll_id"] );
+	private function check_voted_cookie() {
+		if( ! empty( $_COOKIE[ "voted_" . $this->poll_id ] ) ) {
+			$get_voted_aids = explode( ',', $_COOKIE[ "voted_" . $this->poll_id ] );
 		}
 		else {
 			$get_voted_aids = 0;
@@ -262,7 +279,7 @@ class WP_Polls_Poll {
 	}
 
 	### Function: Check Voted By IP
-	function check_voted_ip( $poll_id ) {
+	private function check_voted_ip() {
 		global $wpdb;
 		$log_expiry = intval(get_option('poll_cookielog_expiry'));
 		$log_expiry_sql = '';
@@ -270,7 +287,7 @@ class WP_Polls_Poll {
 			$log_expiry_sql = 'AND ('.current_time('timestamp').'-(pollip_timestamp+0)) < '.$log_expiry;
 		}
 		// Check IP From IP Logging Database
-		$get_voted_aids = $wpdb->get_col("SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = $poll_id AND pollip_ip = '".get_ipaddress()."' $log_expiry_sql");
+		$get_voted_aids = $wpdb->get_col("SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = " . $this->poll_id . " AND pollip_ip = '".get_ipaddress()."' $log_expiry_sql");
 		if($get_voted_aids) {
 			return $get_voted_aids;
 		} else {
@@ -279,7 +296,7 @@ class WP_Polls_Poll {
 	}
 
 	### Function: Check Voted By Username
-	function check_voted_username( $poll_id ) {
+	private function check_voted_username() {
 		global $wpdb, $user_ID;
 		// Check IP If User Is Guest
 		if (!is_user_logged_in()) {
@@ -292,7 +309,7 @@ class WP_Polls_Poll {
 			$log_expiry_sql = 'AND ('.current_time('timestamp').'-(pollip_timestamp+0)) < '.$log_expiry;
 		}
 		// Check User ID From IP Logging Database
-		$get_voted_aids = $wpdb->get_col("SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = $poll_id AND pollip_userid = $pollsip_userid $log_expiry_sql");
+		$get_voted_aids = $wpdb->get_col("SELECT pollip_aid FROM $wpdb->pollsip WHERE pollip_qid = " . $this->poll_id . " AND pollip_userid = $pollsip_userid $log_expiry_sql");
 		if($get_voted_aids) {
 			return $get_voted_aids;
 		} else {
@@ -302,7 +319,7 @@ class WP_Polls_Poll {
 
 
 	### Function: Display Voting Form
-	function display_pollvote($poll_id, $display_loading = true) {
+	function display_pollvote( $poll_id, $display_loading = true ) {
 		global $wpdb;
 		// Temp Poll Result
 		$temp_pollvote = '';
@@ -567,7 +584,7 @@ class WP_Polls_Poll {
 				}
 			}
 			// Results Footer Variables
-			if(!empty($user_voted) || $poll_question_active == 0 || !check_allowtovote()) {
+			if( ! empty( $user_voted ) || $poll_question_active == 0 || ! $this->check_allowtovote() ) {
 				$template_footer = stripslashes(get_option('poll_template_resultfooter'));
 			} else {
 				$template_footer = stripslashes(get_option('poll_template_resultfooter2'));

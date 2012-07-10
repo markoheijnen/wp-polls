@@ -201,13 +201,6 @@ class WP_Polls {
 				exit();
 			}
 
-			// Verify Captcha
-			$securimage = new Securimage();
-			if( $securimage->check( $_POST['poll_' . $poll_id . '_captcha'] ) == false) {
-				_e( "You didn't fill in the Captcha correctly", 'wp-polls' );
-				exit();
-			}
-
 			$poll = new WP_Polls_Poll( $poll_id );
 			$poll->vote();
 		}
