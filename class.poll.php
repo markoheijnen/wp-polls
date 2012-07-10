@@ -127,7 +127,7 @@ class WP_Polls_Poll {
 				// Verify Captcha
 				$securimage = new Securimage();
 				if( $securimage->check( $_POST['poll_' . $this->poll_id . '_captcha'] ) == false) {
-					_e( "You didn't fill in the Captcha correctly", 'wp-polls' );
+					echo $this->display_pollvote( $this->poll_id, false, __( "You didn't fill in the Captcha correctly.", 'wp-polls' ) );
 					exit();
 				}
 
@@ -319,14 +319,19 @@ class WP_Polls_Poll {
 
 
 	### Function: Display Voting Form
-	function display_pollvote( $poll_id, $display_loading = true ) {
+	function display_pollvote( $poll_id, $display_loading = true, $message = false ) {
 		global $wpdb;
 		// Temp Poll Result
 		$temp_pollvote = '';
 		// Get Poll Question Data
 		$poll_question = $wpdb->get_row("SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
+
 		// Poll Question Variables
 		$poll_question_text = stripslashes($poll_question->pollq_question);
+		if( $message ) {
+			$poll_question_text .= '<br/>' . $message;
+		}
+
 		$poll_question_id = intval($poll_question->pollq_id);
 		$poll_question_totalvotes = intval($poll_question->pollq_totalvotes);
 		$poll_question_totalvoters = intval($poll_question->pollq_totalvoters);
@@ -373,8 +378,10 @@ class WP_Polls_Poll {
 			if($poll_multiple_ans > 0) {
 				$temp_pollvote .= "\t\t<p style=\"display: none;\"><input type=\"hidden\" id=\"poll_multiple_ans_$poll_question_id\" name=\"poll_multiple_ans_$poll_question_id\" value=\"$poll_multiple_ans\" /></p>\n";
 			}
+
 			// Print Out Voting Form Header Template
 			$temp_pollvote .= "\t\t$template_question\n";
+
 			foreach($poll_answers as $poll_answer) {
 				// Poll Answer Variables
 				$poll_answer_id = intval($poll_answer->polla_aid); 
