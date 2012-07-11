@@ -752,7 +752,7 @@ function in_pollarchive() {
 
 
 ### Function: Create Poll Tables
-add_action('activate_wp-polls/wp-polls.php', 'create_poll_table');
+register_activation_hook( __FILE__, 'create_poll_table' );
 function create_poll_table() {
 	global $wpdb;
 	if(@is_file(ABSPATH.'/wp-admin/includes/upgrade.php')) {
