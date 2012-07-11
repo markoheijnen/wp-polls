@@ -125,10 +125,12 @@ class WP_Polls_Poll {
 			// Poll Vote
 			case 'process':
 				// Verify Captcha
-				$securimage = new Securimage();
-				if( $securimage->check( $_POST['poll_captcha'] ) == false) {
-					echo $this->display_pollvote( $this->poll_id, false, __( "You didn't fill in the Captcha correctly.", 'wp-polls' ) );
-					exit();
+				if( '1' == get_option('poll_spam_captcha') ) {
+					$securimage = new Securimage();
+					if( $securimage->check( $_POST['poll_captcha'] ) == false) {
+						echo $this->display_pollvote( $this->poll_id, false, __( "You didn't fill in the Captcha correctly.", 'wp-polls' ) );
+						exit();
+					}
 				}
 
 				$poll_aid = $_POST["poll_answer"];
