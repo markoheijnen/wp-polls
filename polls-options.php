@@ -129,7 +129,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 			if(pollbar_style == "use_css") {
 				jQuery("#wp-polls-pollbar").css("background-image", "none");
 			} else {
-				jQuery("#wp-polls-pollbar").css("background-image", "url('<?php echo plugins_url('wp-polls/images/'); ?>" + pollbar_style + "/pollbg.gif')");
+				jQuery("#wp-polls-pollbar").css("background-image", "url('<?php echo plugins_url( 'assets/', __FILE__ ); ?>" + pollbar_style + "/pollbg.gif')");
 			}
 		}
 		jQuery("#wp-polls-pollbar").css({"background-color":pollbar_background, "border":"1px solid " + pollbar_border, "height":pollbar_height});
@@ -150,8 +150,8 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 			<td colspan="2">
 				<?php
 					$pollbar = get_option('poll_bar');
-					$pollbar_url = plugins_url('wp-polls/images');
-					$pollbar_path = WP_PLUGIN_DIR.'/wp-polls/images';
+					$pollbar_url = plugins_url( 'assets', __FILE__ );
+					$pollbar_path = plugin_dir_path( __FILE__ ) . '/assets';
 					if($handle = @opendir($pollbar_path)) {     
 						while (false !== ($filename = readdir($handle))) {  
 							if (substr($filename, 0, 1) != '.' && substr($filename, 0, 2) != '..') {
@@ -197,7 +197,7 @@ if( isset($_POST['Submit']) && $_POST['Submit'] ) {
 					if($pollbar['style'] == 'use_css') {
 						echo '<div id="wp-polls-pollbar" style="width: 100px; height: '.$pollbar['height'].'px; background-color: #'.$pollbar['background'].'; border: 1px solid #'.$pollbar['border'].'"></div>'."\n";
 					} else {
-						echo '<div id="wp-polls-pollbar" style="width: 100px; height: '.$pollbar['height'].'px; background-color: #'.$pollbar['background'].'; border: 1px solid #'.$pollbar['border'].'; background-image: url(\''.plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif').'\');"></div>'."\n";
+						echo '<div id="wp-polls-pollbar" style="width: 100px; height: '.$pollbar['height'].'px; background-color: #'.$pollbar['background'].'; border: 1px solid #'.$pollbar['border'].'; background-image: url(\''.plugins_url( 'assets/' . $pollbar['style'] . '/pollbg.gif', __FILE__ ).'\');"></div>'."\n";
 					}
 				?>
 			</td>

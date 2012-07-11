@@ -75,7 +75,7 @@ class WP_Polls {
 
 	### Create Text Domain For Translations
 	function polls_textdomain() {
-		load_plugin_textdomain( 'wp-polls', false, 'wp-polls' );
+		load_plugin_textdomain( 'wp-polls', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
 	### Function: Init WP-Polls Widget
@@ -98,7 +98,7 @@ class WP_Polls {
 			echo "\t" . 'background: #' . $pollbar['background'] . ';' . "\n";
 		}
 		else {
-			echo "\t" . 'background-image: url(\'' . plugins_url('wp-polls/images/' . $pollbar['style'] . '/pollbg.gif') . '\');' . "\n";
+			echo "\t" . 'background-image: url(\'' . plugins_url( 'assets/' . $pollbar['style'] . '/pollbg.gif', __FILE__  ) . '\');' . "\n";
 		}
 
 		echo "\t" . 'border: 1px solid #' . $pollbar['border'] . ';' . "\n";
@@ -119,7 +119,7 @@ class WP_Polls {
 			wp_enqueue_style( 'wp-polls', get_stylesheet_directory_uri() . '/polls-css.css', false, $this->version, 'all' );
 		}
 		else {
-			wp_enqueue_style( 'wp-polls', plugins_url('wp-polls/polls-css.css'), false, $this->version, 'all' );
+			wp_enqueue_style( 'wp-polls', plugins_url( 'assets/polls-css.css', __FILE__ ), false, $this->version, 'all' );
 		}
 
 		if( is_rtl() ) {
@@ -127,14 +127,14 @@ class WP_Polls {
 				wp_enqueue_style( 'wp-polls-rtl', get_stylesheet_directory_uri() . '/polls-css-rtl.css', false, $this->version, 'all' );
 			}
 			else {
-				wp_enqueue_style( 'wp-polls-rtl', plugins_url('wp-polls/polls-css-rtl.css'), false, $this->version, 'all' );
+				wp_enqueue_style( 'wp-polls-rtl', plugins_url( 'assets/polls-css-rtl.css', __FILE__ ), false, $this->version, 'all' );
 			}
 		}
 
 		$poll_ajax_style = get_option('poll_ajax_style');
 		$pollbar = get_option('poll_bar');
 
-		wp_enqueue_script( 'wp-polls', plugins_url('wp-polls/polls-js.js'), array( 'jquery' ), $this->version, true );
+		wp_enqueue_script( 'wp-polls', plugins_url( 'assets/polls-js.js', __FILE__ ), array( 'jquery' ), $this->version, true );
 
 		wp_localize_script( 'wp-polls', 'pollsL10n', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
