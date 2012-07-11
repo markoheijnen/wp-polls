@@ -529,7 +529,7 @@ class WP_Polls_Poll {
 			// Print Out Result Header Template
 			$temp_pollresult .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
 			$temp_pollresult .= "\t\t$template_question\n";
-			foreach($poll_answers as $poll_answer) {
+			foreach( $poll_answers as $poll_answer ) {
 				// Poll Answer Variables
 				$poll_answer_id         = intval($poll_answer->polla_aid); 
 				$poll_answer_text       = stripslashes($poll_answer->polla_answers);
@@ -558,13 +558,14 @@ class WP_Polls_Poll {
 				}
 
 				// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer
-				if($poll_multiple_ans == 0) {
+				if( ! $poll_totalvotes_zero ) {
 					$poll_answer_percentage_array[] = $poll_answer_percentage;
 
-					if(sizeof($poll_answer_percentage_array) == sizeof($poll_answers)) {
-						$percentage_error_buffer = 100 - array_sum($poll_answer_percentage_array);
-						$poll_answer_percentage = $poll_answer_percentage + $percentage_error_buffer;
-						if($poll_answer_percentage < 0) {
+					if( sizeof( $poll_answer_percentage_array ) == sizeof( $poll_answers ) ) {
+						$percentage_error_buffer = 100 - array_sum( $poll_answer_percentage_array );
+						$poll_answer_percentage  = $poll_answer_percentage + $percentage_error_buffer;
+
+						if( $poll_answer_percentage < 0 ) {
 							$poll_answer_percentage = 0;
 						}
 					}
