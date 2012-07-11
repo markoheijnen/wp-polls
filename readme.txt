@@ -39,6 +39,13 @@ WP-Polls is extremely customizable via templates and css styles and there are to
 == Changelog ==
 
 = Version 3.0 (10-07-2012) =
+* Removed deprecated stuff and for now we require 3.3. Add new poll to the toolbar
+
+* Change file structure to be more open and clean what it contains
+* Change AJAX call parameters. Removed the poll_id in the naming
+* Cleaned up more in the javascript file. Made .dev more readable. The loaded version is little bit smaller now
+* Implemented spam control options like captcha. What is off by default
+* Fixes some notices
 
 
 = Version 2.63 (21-05-2012) =
