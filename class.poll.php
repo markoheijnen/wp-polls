@@ -460,13 +460,16 @@ class WP_Polls_Poll {
 	### Function: Display Results Form
 	function display_pollresult($poll_id, $user_voted = '', $display_loading = true) {
 		global $wpdb;
-		$poll_id = intval($poll_id);
+		$poll_id = intval( $poll_id );
+
 		// User Voted
-		if(!is_array($user_voted)) {
+		if( ! is_array( $user_voted ) ) {
 			$user_voted = array();
 		}
+
 		// Temp Poll Result
-		$temp_pollresult = '';	
+		$temp_pollresult = '';
+
 		// Most/Least Variables
 		$poll_most_answer = '';
 		$poll_most_votes = 0;
@@ -474,8 +477,10 @@ class WP_Polls_Poll {
 		$poll_least_answer = '';
 		$poll_least_votes = 0;
 		$poll_least_percentage = 0;
+
 		// Get Poll Question Data
 		$poll_question = $wpdb->get_row("SELECT pollq_id, pollq_question, pollq_totalvotes, pollq_active, pollq_timestamp, pollq_expiry, pollq_multiple, pollq_totalvoters FROM $wpdb->pollsq WHERE pollq_id = $poll_id LIMIT 1");
+
 		// Poll Question Variables
 		$poll_question_text = stripslashes($poll_question->pollq_question);
 		$poll_question_id = intval($poll_question->pollq_id);
@@ -484,11 +489,14 @@ class WP_Polls_Poll {
 		$poll_question_active = intval($poll_question->pollq_active);
 		$poll_start_date = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_question->pollq_timestamp));
 		$poll_expiry = trim($poll_question->pollq_expiry);
-		if(empty($poll_expiry)) {
+
+		if( empty( $poll_expiry ) ) {
 			$poll_end_date  = __('No Expiry', 'wp-polls');
-		} else {
+		}
+		else {
 			$poll_end_date  = mysql2date(sprintf(__('%s @ %s', 'wp-polls'), get_option('date_format'), get_option('time_format')), gmdate('Y-m-d H:i:s', $poll_expiry));
 		}
+
 		$poll_multiple_ans = intval($poll_question->pollq_multiple);
 		$template_question = stripslashes(get_option('poll_template_resultheader'));
 		$template_question = str_replace("%POLL_QUESTION%", $poll_question_text, $template_question);
@@ -497,13 +505,17 @@ class WP_Polls_Poll {
 		$template_question = str_replace("%POLL_TOTALVOTERS%", $poll_question_totalvoters, $template_question);
 		$template_question = str_replace("%POLL_START_DATE%", $poll_start_date, $template_question);
 		$template_question = str_replace("%POLL_END_DATE%", $poll_end_date, $template_question);
-		if($poll_multiple_ans > 0) {
+
+		if( $poll_multiple_ans > 0 ) {
 			$template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", $poll_multiple_ans, $template_question);
-		} else {
+		}
+		else {
 			$template_question = str_replace("%POLL_MULTIPLE_ANS_MAX%", '1', $template_question);
 		}
+
 		// Get Poll Answers Data
 		$poll_answers = $wpdb->get_results("SELECT polla_aid, polla_answers, polla_votes FROM $wpdb->pollsa WHERE polla_qid = $poll_question_id ORDER BY ".get_option('poll_ans_result_sortby').' '.get_option('poll_ans_result_sortorder'));
+
 		// If There Is Poll Question With Answers
 		if($poll_question && $poll_answers) {
 			// Store The Percentage Of The Poll
@@ -513,35 +525,42 @@ class WP_Polls_Poll {
 			if($poll_question_totalvotes > 0) {
 				$poll_totalvotes_zero = false;
 			}
+
 			// Print Out Result Header Template
 			$temp_pollresult .= "<div id=\"polls-$poll_question_id\" class=\"wp-polls\">\n";
 			$temp_pollresult .= "\t\t$template_question\n";
 			foreach($poll_answers as $poll_answer) {
 				// Poll Answer Variables
-				$poll_answer_id = intval($poll_answer->polla_aid); 
-				$poll_answer_text = stripslashes($poll_answer->polla_answers);
-				$poll_answer_votes = intval($poll_answer->polla_votes);
+				$poll_answer_id         = intval($poll_answer->polla_aid); 
+				$poll_answer_text       = stripslashes($poll_answer->polla_answers);
+				$poll_answer_votes      = intval($poll_answer->polla_votes);
 				$poll_answer_percentage = 0;
 				$poll_answer_imagewidth = 0;
+
 				// Calculate Percentage And Image Bar Width
-				if(!$poll_totalvotes_zero) {
+				if( ! $poll_totalvotes_zero ) {
 					if($poll_answer_votes > 0) {
-						$poll_answer_percentage = round((($poll_answer_votes/$poll_question_totalvoters)*100));
-						$poll_answer_imagewidth = round($poll_answer_percentage);
-						if($poll_answer_imagewidth == 100) {
+						$poll_answer_percentage = round( ( ( $poll_answer_votes / $poll_question_totalvotes ) * 100 ) );
+						$poll_answer_imagewidth = round( $poll_answer_percentage );
+
+						if( $poll_answer_imagewidth == 100 ) {
 							$poll_answer_imagewidth = 99;
 						}
-					} else {
+					}
+					else {
 						$poll_answer_percentage = 0;
 						$poll_answer_imagewidth = 1;
 					}
-				} else {
+				}
+				else {
 					$poll_answer_percentage = 0;
 					$poll_answer_imagewidth = 1;
 				}
+
 				// Make Sure That Total Percentage Is 100% By Adding A Buffer To The Last Poll Answer
 				if($poll_multiple_ans == 0) {
 					$poll_answer_percentage_array[] = $poll_answer_percentage;
+
 					if(sizeof($poll_answer_percentage_array) == sizeof($poll_answers)) {
 						$percentage_error_buffer = 100 - array_sum($poll_answer_percentage_array);
 						$poll_answer_percentage = $poll_answer_percentage + $percentage_error_buffer;
@@ -550,6 +569,7 @@ class WP_Polls_Poll {
 						}
 					}
 				}
+
 				// Let User See What Options They Voted
 				if(in_array($poll_answer_id, $user_voted)) {
 					// Results Body Variables
