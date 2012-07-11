@@ -73,11 +73,11 @@ class WP_Polls_Poll {
 		// User Click on View Results Link
 		if( $pollresult_id == $this->poll_id ) {
 			if( $display ) {
-				echo display_pollresult( $this->poll_id );
+				echo $this->display_pollresult( $this->poll_id );
 				return;
 			}
 			else {
-				return display_pollresult( $this->poll_id );
+				return $this->display_pollresult( $this->poll_id );
 			}
 		// Check Whether User Has Voted
 		}
@@ -92,10 +92,10 @@ class WP_Polls_Poll {
 			}
 			if(intval($check_voted) > 0 || (is_array($check_voted) && sizeof($check_voted) > 0) || ($poll_active == 0 && $poll_close == 1)) {
 				if($display) {
-					echo display_pollresult( $this->poll_id, $check_voted );
+					echo $this->display_pollresult( $this->poll_id, $check_voted );
 					return;
 				} else {
-					return display_pollresult( $this->poll_id, $check_voted);
+					return $this->display_pollresult( $this->poll_id, $check_voted);
 				}
 			} elseif( ! $this->check_allowtovote() || ( $poll_active == 0 && $poll_close == 3 ) ) {
 				$disable_poll_js = '<script type="text/javascript">jQuery("#polls_form_' . $this->poll_id . ' :input").each(function (i){jQuery(this).attr("disabled","disabled")});</script>';
