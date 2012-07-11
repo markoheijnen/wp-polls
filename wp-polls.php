@@ -60,8 +60,8 @@ class WP_Polls {
 		add_shortcode( 'page_polls', array( &$this, 'poll_page_shortcode' ) );
 		add_shortcode( 'poll', array( &$this, 'poll_shortcode' ) );
 
-		add_action( 'wp_ajax_polls', array( &$this, 'vote_poll' ) );
-		add_action( 'wp_ajax_nopriv_polls', array( &$this, 'vote_poll' ) );
+		add_action( 'wp_ajax_wp_polls', array( &$this, 'vote_poll' ) );
+		add_action( 'wp_ajax_nopriv_wp_polls', array( &$this, 'vote_poll' ) );
 	}
 
 	### Polls Table Name
@@ -179,31 +179,28 @@ class WP_Polls {
 
 	### Function: Vote Poll
 	function vote_poll() {
-		if( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'polls' )
+		// Load Headers
+		header('Content-Type: text/html; charset=' . get_option('blog_charset') );
+
+		// Get Poll ID
+		$poll_id = ( isset( $_REQUEST['poll_id'] ) ? intval( $_REQUEST['poll_id'] ) : 0);
+
+		// Ensure Poll ID Is Valid
+		if( $poll_id == 0 )
 		{
-			// Load Headers
-			header('Content-Type: text/html; charset='.get_option('blog_charset').'');
-
-			// Get Poll ID
-			$poll_id = ( isset( $_REQUEST['poll_id'] ) ? intval( $_REQUEST['poll_id'] ) : 0);
-
-			// Ensure Poll ID Is Valid
-			if( $poll_id == 0 )
-			{
-				_e( 'Invalid Poll ID', 'wp-polls' );
-				exit();
-			}
-
-			// Verify Referer
-			if( ! check_ajax_referer( 'poll_' . $poll_id . '-nonce', 'poll_' . $poll_id . '_nonce', false ) )
-			{
-				_e('Failed To Verify Referrer', 'wp-polls');
-				exit();
-			}
-
-			$poll = new WP_Polls_Poll( $poll_id );
-			$poll->vote();
+			_e( 'Invalid Poll ID', 'wp-polls' );
+			exit();
 		}
+
+		// Verify Referer
+		if( ! isset( $_REQUEST['poll_nonce'] ) || ! check_ajax_referer( 'poll_' . $poll_id . '-nonce', 'poll_nonce', false ) )
+		{
+			_e( 'Failed To Verify Referrer', 'wp-polls' );
+			exit();
+		}
+
+		$poll = new WP_Polls_Poll( $poll_id );
+		$poll->vote();
 
 		exit();
 	}
